@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiramisusu Bandung — Oleh-Oleh & Dessert Bandung</title>
+<meta name="description" content="Tiramisusu Bandung — pilihan dessert, cake, pie, cookies, yoghurt dan produk oleh-oleh khas Bandung. Temukan produk, lokasi toko dan kanal pemesanan.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'DM Sans',sans-serif;background:#fbfaf7}
+.serif{font-family:'Playfair Display',serif}
+[x-cloak]{display:none!important}
+.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{scrollbar-width:none}
+.product-card{transition:transform .3s ease,box-shadow .3s ease}
+.product-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(70,45,25,.12)}
+.hero-gradient{background:radial-gradient(circle at 80% 20%,rgba(236,174,99,.18),transparent 30%),linear-gradient(135deg,#302019 0%,#4b2d20 52%,#7b4b2e 100%)}
+</style>
+</head>
+
+<body x-data="tiramisusuApp()" class="text-stone-800 antialiased">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 bg-[#fbfaf7]/95 backdrop-blur border-b border-stone-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="h-[72px] flex items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3 shrink-0">
+        <div class="w-11 h-11 rounded-2xl bg-[#4b2d20] text-[#f7d39d] flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-cake-candles text-lg"></i>
+        </div>
+        <div>
+          <div class="serif text-xl font-bold text-[#3a241a] leading-none">Tiramisusu</div>
+          <div class="text-[10px] uppercase tracking-[.2em] text-stone-500 mt-1">Bandung</div>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-1 bg-stone-100 rounded-xl p-1">
+        <template x-for="tab in tabs" :key="tab.id">
+          <button @click="activeTab=tab.id"
+            :class="activeTab===tab.id?'bg-white text-[#5b3322] shadow-sm':'text-stone-600 hover:text-stone-900'"
+            class="px-4 py-2 rounded-lg text-sm font-semibold transition" x-text="tab.name"></button>
+        </template>
+      </nav>
+
+      <button @click="cartOpen=true"
+        class="relative flex items-center gap-2 bg-[#4b2d20] text-white px-3 sm:px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-[#633c29] transition">
+        <i class="fa-solid fa-bag-shopping"></i><span class="hidden sm:inline">Pilihan</span>
+        <span x-show="cart.length" x-text="cart.length" class="min-w-5 h-5 px-1 rounded-full bg-[#e7b36b] text-[#3a241a] text-[11px] flex items-center justify-center"></span>
+      </button>
+    </div>
+  </div>
+  <div class="lg:hidden border-t border-stone-200 px-4 py-2 overflow-x-auto no-scrollbar">
+    <div class="flex gap-2 min-w-max">
+      <template x-for="tab in tabs" :key="tab.id">
+        <button @click="activeTab=tab.id"
+          :class="activeTab===tab.id?'bg-[#4b2d20] text-white':'bg-white text-stone-600 border border-stone-200'"
+          class="px-4 py-2 rounded-lg text-xs font-semibold" x-text="tab.name"></button>
+      </template>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero-gradient text-white overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20 grid lg:grid-cols-2 gap-10 items-center">
+    <div>
+      <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-[#f7d39d] text-xs font-bold">
+        <i class="fa-solid fa-location-dot"></i> Hanya ada di Bandung
+      </span>
+      <h1 class="serif text-5xl sm:text-6xl lg:text-7xl leading-[.98] mt-5">Bawa pulang<br><span class="text-[#e7b36b]">rasa Bandung.</span></h1>
+      <p class="text-stone-200 max-w-xl mt-6 text-base sm:text-lg leading-relaxed">
+        Jelajahi pilihan Tiramisusu, cake, pie, cookies, yoghurt dan camilan dari Tiramisusu Bandung.
+        Temukan produk favorit, toko terdekat, lalu pilih kanal pembelian Anda.
+      </p>
+      <div class="flex flex-wrap gap-3 mt-8">
+        <button @click="activeTab='produk'; window.scrollTo({top:document.querySelector('#catalog').offsetTop-90,behavior:'smooth'})"
+          class="bg-[#e7b36b] text-[#3a241a] px-5 py-3 rounded-xl font-extrabold text-sm hover:bg-[#f0c88f] transition">
+          Jelajahi Produk <i class="fa-solid fa-arrow-right ml-2"></i>
+        </button>
+        <button @click="activeTab='lokasi'; window.scrollTo({top:document.querySelector('#catalog').offsetTop-90,behavior:'smooth'})"
+          class="bg-white/10 border border-white/20 px-5 py-3 rounded-xl font-bold text-sm hover:bg-white/15 transition">
+          Lihat Lokasi
+        </button>
+      </div>
+      <div class="flex flex-wrap gap-x-6 gap-y-2 mt-7 text-xs text-stone-300">
+        <span><i class="fa-solid fa-star text-[#e7b36b] mr-1"></i> 4,6 · 7.841 ulasan</span>
+        <span><i class="fa-solid fa-clock mr-1"></i> Buka hingga 21.00</span>
+        <span><i class="fa-solid fa-bag-shopping mr-1"></i> Bawa pulang</span>
+      </div>
+    </div>
+    <div class="relative">
+      <div class="aspect-[4/3] rounded-[2rem] overflow-hidden border border-white/15 shadow-2xl bg-[#6a402b]">
+        <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=1200&q=85"
+             alt="Dessert tiramisu" class="w-full h-full object-cover opacity-90">
+      </div>
+      <div class="absolute -bottom-5 left-5 sm:left-8 bg-white text-stone-800 rounded-2xl shadow-xl p-4 max-w-xs">
+        <div class="text-[10px] uppercase tracking-[.2em] text-stone-400 font-bold">Favorit pengunjung</div>
+        <div class="font-bold mt-1">Tiramisusu Original</div>
+        <div class="text-xs text-stone-500 mt-1">Choco Bag · Cake · Pie · Cookies · Yoghurt</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main id="catalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="grid sm:grid-cols-3 gap-4 mb-10">
+    <div class="bg-white border border-stone-200 rounded-2xl p-5">
+      <div class="text-xs text-stone-400 uppercase tracking-widest font-bold">Rating Maps</div>
+      <div class="flex items-end gap-2 mt-2"><b class="text-3xl">4,6</b><span class="text-stone-400 text-sm mb-1">/ 5</span></div>
+      <div class="text-[#c18b45] text-sm mt-1">★★★★★ <span class="text-stone-400 ml-1">7.841 ulasan</span></div>
+    </div>
+    <div class="bg-white border border-stone-200 rounded-2xl p-5">
+      <div class="text-xs text-stone-400 uppercase tracking-widest font-bold">Identitas</div>
+      <div class="font-bold text-lg mt-2">Oleh-oleh Bandung</div>
+      <p class="text-xs text-stone-500 mt-1">Produk dessert & makanan yang tersedia di berbagai store Bandung.</p>
+    </div>
+    <div class="bg-white border border-stone-200 rounded-2xl p-5">
+      <div class="text-xs text-stone-400 uppercase tracking-widest font-bold">Jam Toko</div>
+      <div class="font-bold text-lg mt-2">Buka · Tutup 21.00</div>
+      <p class="text-xs text-stone-500 mt-1">Cek lokasi pilihan sebelum berkunjung.</p>
+    </div>
+  </div>
+
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-stone-200 pb-6">
+    <div>
+      <p class="text-[#a86f38] text-xs uppercase tracking-[.2em] font-extrabold">Explore Tiramisusu</p>
+      <h2 class="serif text-4xl text-[#3a241a] mt-2" x-text="currentTitle()"></h2>
+      <p class="text-stone-500 text-sm mt-2 max-w-2xl" x-text="currentDescription()"></p>
+    </div>
+    <div class="relative w-full md:w-72">
+      <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+      <input x-model="search" placeholder="Cari produk..."
+        class="w-full pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-[#d9a461]/30 focus:border-[#b98042] text-sm">
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section x-show="activeTab==='produk'" x-transition class="pt-7">
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button @click="category='Semua'" :class="category==='Semua'?'bg-[#4b2d20] text-white':'bg-white border border-stone-200'" class="px-3 py-2 rounded-lg text-xs font-bold">Semua</button>
+      <template x-for="c in categories" :key="c">
+        <button @click="category=c" :class="category===c?'bg-[#4b2d20] text-white':'bg-white border border-stone-200'" class="px-3 py-2 rounded-lg text-xs font-bold" x-text="c"></button>
+      </template>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <template x-for="item in filteredProducts()" :key="item.id">
+        <article class="product-card bg-white border border-stone-200 rounded-2xl overflow-hidden">
+          <div class="h-56 overflow-hidden bg-stone-100 relative">
+            <img :src="item.image" :alt="item.name" class="w-full h-full object-cover" loading="lazy">
+            <span x-show="item.badge" x-text="item.badge" class="absolute top-3 left-3 bg-[#4b2d20] text-white text-[11px] px-3 py-1.5 rounded-full font-bold"></span>
+          </div>
+          <div class="p-5">
+            <div class="text-[10px] uppercase tracking-widest text-[#b27a3e] font-extrabold" x-text="item.category"></div>
+            <h3 class="serif text-2xl text-[#3a241a] mt-1" x-text="item.name"></h3>
+            <p class="text-sm text-stone-500 leading-relaxed mt-2" x-text="item.description"></p>
+            <div class="flex flex-wrap gap-1.5 mt-4">
+              <template x-for="tag in item.tags" :key="tag"><span class="bg-stone-100 text-stone-600 px-2 py-1 rounded-md text-[10px] font-semibold" x-text="tag"></span></template>
+            </div>
+            <button @click="add(item)" class="w-full mt-5 py-3 rounded-xl bg-[#4b2d20] text-white text-sm font-bold hover:bg-[#633c29] transition">
+              <i class="fa-solid fa-plus mr-2"></i> Tambahkan ke Pilihan
+            </button>
+          </div>
+        </article>
+      </template>
+    </div>
+    <div x-show="filteredProducts().length===0" class="text-center py-16 text-stone-400">Produk tidak ditemukan.</div>
+  </section>
+
+  <!-- LOCATIONS -->
+  <section x-show="activeTab==='lokasi'" x-transition class="pt-7">
+    <div class="grid lg:grid-cols-2 gap-5">
+      <template x-for="loc in locations" :key="loc.name">
+        <div class="bg-white border border-stone-200 rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#b27a3e] font-extrabold">Store</p>
+                <h3 class="serif text-2xl mt-1" x-text="loc.name"></h3>
+              </div>
+              <span class="bg-stone-100 text-stone-500 px-2.5 py-1 rounded-lg text-[10px] font-bold">Bandung</span>
+            </div>
+            <p class="text-sm text-stone-500 mt-4" x-text="loc.address"></p>
+          </div>
+          <a :href="loc.maps" target="_blank" rel="noopener" class="mt-6 inline-flex justify-center items-center gap-2 bg-[#4b2d20] text-white rounded-xl py-3 text-sm font-bold">
+            <i class="fa-solid fa-diamond-turn-right"></i> Buka Google Maps
+          </a>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ONLINE -->
+  <section x-show="activeTab==='online'" x-transition class="pt-7">
+    <div class="grid md:grid-cols-3 gap-5">
+      <template x-for="channel in channels" :key="channel.name">
+        <div class="bg-white border border-stone-200 rounded-2xl p-6">
+          <div class="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center text-[#4b2d20]"><i :class="channel.icon" class="text-lg"></i></div>
+          <h3 class="font-bold text-lg mt-4" x-text="channel.name"></h3>
+          <p class="text-sm text-stone-500 mt-1" x-text="channel.note"></p>
+          <a :href="channel.url" target="_blank" rel="noopener" class="mt-5 inline-flex items-center gap-2 text-[#9b6532] font-bold text-sm">Buka kanal <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+        </div>
+      </template>
+    </div>
+    <div class="mt-6 bg-[#f2eadf] rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-widest text-[#9b6532] font-extrabold">Marketplace</p>
+      <h3 class="serif text-3xl mt-1">Official Store</h3>
+      <p class="text-sm text-stone-600 mt-2">Tersedia melalui Shopee Mall Official Shop dan Tokopedia Official Store.</p>
+      <div class="flex flex-wrap gap-3 mt-5">
+        <a href="https://shopee.co.id/" target="_blank" class="px-4 py-2.5 rounded-xl bg-white border border-stone-200 text-sm font-bold">Shopee Mall</a>
+        <a href="https://www.tokopedia.com/" target="_blank" class="px-4 py-2.5 rounded-xl bg-white border border-stone-200 text-sm font-bold">Tokopedia</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section x-show="activeTab==='tentang'" x-transition class="pt-7">
+    <div class="grid lg:grid-cols-5 gap-6">
+      <div class="lg:col-span-3 bg-[#4b2d20] text-white rounded-3xl p-8">
+        <p class="text-[#e7b36b] text-xs uppercase tracking-widest font-extrabold">Tiramisusu Bandung</p>
+        <h3 class="serif text-4xl mt-3">Dessert untuk dibawa pulang, dinikmati, dan dibagikan.</h3>
+        <p class="text-stone-200 leading-relaxed mt-5">Tiramisusu dikenal sebagai salah satu pilihan oleh-oleh kekinian Bandung dengan beragam produk seperti tiramisusu, cake, pie, cookies, yoghurt, dan produk makanan lainnya.</p>
+        <div class="grid sm:grid-cols-3 gap-3 mt-7">
+          <div class="bg-white/10 rounded-xl p-4"><b class="text-xl">4,6</b><span class="block text-xs text-stone-300 mt-1">Rating</span></div>
+          <div class="bg-white/10 rounded-xl p-4"><b class="text-xl">7.841</b><span class="block text-xs text-stone-300 mt-1">Ulasan</span></div>
+          <div class="bg-white/10 rounded-xl p-4"><b class="text-xl">Bandung</b><span class="block text-xs text-stone-300 mt-1">Kota asal</span></div>
+        </div>
+      </div>
+      <div class="lg:col-span-2 space-y-5">
+        <div class="bg-white border border-stone-200 rounded-2xl p-6">
+          <h4 class="font-bold">Produk yang ditampilkan</h4>
+          <p class="text-sm text-stone-500 mt-2">Tiramisusu Original, Cookies & Cream, Moo Moo Roll, Tiramisu Cake, pie, yoghurt, cookies dan pilihan lainnya.</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-2xl p-6">
+          <h4 class="font-bold">Media sosial</h4>
+          <p class="text-sm text-stone-500 mt-2">@tiramisusubandung · Instagram · TikTok</p>
+          <a href="https://linktr.ee/tiramisusubandung" target="_blank" class="inline-block mt-4 text-[#9b6532] font-bold text-sm">Buka Linktree →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- CART -->
+<div x-show="cartOpen" x-cloak class="fixed inset-0 z-[60]">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="cartOpen=false"></div>
+  <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-[#fbfaf7] shadow-2xl flex flex-col">
+    <div class="p-6 bg-[#4b2d20] text-white flex items-center justify-between">
+      <div><div class="text-xs uppercase tracking-widest text-[#e7b36b] font-bold">Pilihan Anda</div><h2 class="serif text-2xl mt-1">Daftar Produk</h2></div>
+      <button @click="cartOpen=false" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 space-y-3">
+      <template x-for="(item,i) in cart" :key="item.id">
+        <div class="bg-white border border-stone-200 rounded-xl p-4 flex gap-3">
+          <img :src="item.image" class="w-16 h-16 rounded-lg object-cover">
+          <div class="flex-1">
+            <div class="font-bold text-sm" x-text="item.name"></div>
+            <div class="text-xs text-stone-500 mt-1" x-text="item.category"></div>
+            <div class="flex items-center gap-2 mt-3">
+              <button @click="dec(i)" class="w-7 h-7 rounded-lg border border-stone-200">−</button>
+              <span class="text-sm font-bold" x-text="item.qty"></span>
+              <button @click="inc(i)" class="w-7 h-7 rounded-lg border border-stone-200">+</button>
+              <button @click="remove(i)" class="ml-auto text-stone-400 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      </template>
+      <div x-show="!cart.length" class="text-center py-20 text-stone-400">
+        <i class="fa-solid fa-bag-shopping text-4xl"></i><p class="mt-3 text-sm">Belum ada produk pilihan.</p>
+      </div>
+    </div>
+    <div class="p-5 border-t border-stone-200 bg-white">
+      <p class="text-xs text-stone-500 leading-relaxed">Harga dan ketersediaan dapat berbeda menurut toko/kanal pembelian. Konfirmasi harga saat melakukan pemesanan.</p>
+      <button @click="sendWA()" class="w-full mt-4 py-3.5 rounded-xl bg-[#168a4b] text-white font-extrabold text-sm hover:bg-[#11733e] transition">
+        <i class="fa-brands fa-whatsapp mr-2"></i> Tanyakan / Pesan via WhatsApp
+      </button>
+    </div>
+  </aside>
+</div>
+
+<footer class="bg-[#2d1d16] text-stone-300 mt-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-3 gap-8">
+    <div><div class="serif text-2xl text-white">Tiramisusu</div><p class="text-xs mt-2 text-stone-400">Oleh-oleh Bandung yang kekinian.</p></div>
+    <div><div class="text-xs uppercase tracking-widest text-[#e7b36b] font-bold">Social</div><p class="text-sm mt-3">@tiramisusubandung</p><a href="https://linktr.ee/tiramisusubandung" target="_blank" class="text-sm text-[#e7b36b] mt-2 inline-block">Linktree →</a></div>
+    <div><div class="text-xs uppercase tracking-widest text-[#e7b36b] font-bold">Kontak</div><p class="text-sm mt-3">0811-2007-9004</p><p class="text-xs text-stone-400 mt-1">Jl. Anggrek No.48, Cihapit, Bandung</p></div>
+  </div>
+  <div class="border-t border-white/10 py-4 text-center text-[11px] text-stone-500">© 2026 Tiramisusu Bandung · Prototype website</div>
+</footer>
+
+<script>
+function tiramisusuApp(){
+  return {
+    activeTab:'produk', cartOpen:false, search:'', category:'Semua',
+    tabs:[
+      {id:'produk',name:'Produk'},
+      {id:'lokasi',name:'Lokasi Store'},
+      {id:'online',name:'Belanja Online'},
+      {id:'tentang',name:'Tentang'}
+    ],
+    categories:['Tiramisusu','Cake & Roll','Pie','Cookies','Yoghurt','Lainnya'],
+    products:[
+      {id:1,name:'Tiramisusu Original',category:'Tiramisusu',badge:'Populer',description:'Produk utama yang tercantum sebagai menu populer Tiramisusu Bandung.',tags:['Signature','Favorit'],image:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=900&q=80'},
+      {id:2,name:'Tiramisusu Cookies and Cream',category:'Tiramisusu',badge:'Populer',description:'Varian Tiramisusu dengan pilihan rasa Cookies and Cream.',tags:['Cookies','Dessert'],image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80'},
+      {id:3,name:'Tiramisusu Original Regular Size',category:'Tiramisusu',badge:'',description:'Varian regular size dari Tiramisusu Original.',tags:['Original','Regular'],image:'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=80'},
+      {id:4,name:'Moo Moo Roll',category:'Cake & Roll',badge:'Populer',description:'Moo Moo Roll termasuk dalam daftar produk yang ditampilkan pada menu Tiramisusu Bandung.',tags:['Roll','Cake'],image:'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=900&q=80'},
+      {id:5,name:'Tiramisu Cake',category:'Cake & Roll',badge:'',description:'Pilihan cake tiramisu untuk dinikmati sendiri atau dibawa sebagai oleh-oleh.',tags:['Cake','Tiramisu'],image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80'},
+      {id:6,name:'Pie Cookies and Cream',category:'Pie',badge:'',description:'Pie dengan varian Cookies and Cream yang tercantum dalam menu.',tags:['Pie','Cookies'],image:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=900&q=80'},
+      {id:7,name:'Strawberry Milk Pie',category:'Pie',badge:'',description:'Strawberry Milk Pie dari daftar produk Tiramisusu Bandung.',tags:['Strawberry','Pie'],image:'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?auto=format&fit=crop&w=900&q=80'},
+      {id:8,name:'Crispy Cookies',category:'Cookies',badge:'',description:'Crispy Cookies untuk camilan dan oleh-oleh.',tags:['Crispy','Snack'],image:'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=80'},
+      {id:9,name:'Crispy Brownie',category:'Cookies',badge:'',description:'Crispy Brownie yang termasuk dalam pilihan produk Tiramisusu.',tags:['Brownie','Crispy'],image:'https://images.unsplash.com/photo-1564355808539-22fda35bed7e?auto=format&fit=crop&w=900&q=80'},
+      {id:10,name:'Crispy Almond Cookies',category:'Cookies',badge:'',description:'Cookies dengan almond dari daftar produk Tiramisusu Bandung.',tags:['Almond','Cookies'],image:'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=900&q=80'},
+      {id:11,name:'Yoghurt',category:'Yoghurt',badge:'',description:'Yoghurt termasuk pilihan yang disebutkan pada menu dan ulasan pengunjung.',tags:['Fresh','Drink'],image:'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80'},
+      {id:12,name:'Cheese Puff Ball',category:'Lainnya',badge:'',description:'Cheese Puff Ball dari daftar menu produk Tiramisusu Bandung.',tags:['Cheese','Snack'],image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80'},
+      {id:13,name:'Choco Bag',category:'Lainnya',badge:'Populer',description:'Choco Bag tercantum sebagai salah satu menu populer Tiramisusu.',tags:['Chocolate','Populer'],image:'https://images.unsplash.com/photo-1548907040-4d42fc2a9c1b?auto=format&fit=crop&w=900&q=80'}
+    ],
+    locations:[
+      {name:'Store Cihapit',address:'Jl. Anggrek No.48, Cihapit, Kec. Bandung Wetan, Kota Bandung, Jawa Barat 40114',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Jl.+Anggrek+No.48+Bandung'},
+      {name:'Store Setiabudi',address:'Jl. Setiabudi, Gegerkalong, Bandung',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Setiabudi+Gegerkalong+Bandung'},
+      {name:'Store Lembang',address:'Jl. Raya Lembang, Gudangkahuripan, Bandung Barat',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Jl.+Raya+Lembang+Gudangkahuripan'},
+      {name:'Store Buah Batu',address:'Jl. Buah Batu, Kujangsari, Bandung',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Buah+Batu+Kujangsari+Bandung'},
+      {name:'Store Braga',address:'Jl. Braga, Sumur Bandung, Kota Bandung',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Braga+Bandung'},
+      {name:'Store Paskal',address:'Paskal Hyper Square, Jl. Pasir Kaliki Kel No.36-37 No.25-27 Blok F, Jeruk, Kota Bandung',maps:'https://www.google.com/maps/search/?api=1&query=Tiramisusu+Paskal+Hyper+Square+Bandung'}
+    ],
+    channels:[
+      {name:'GoFood',note:'Pesan Tiramisusu melalui GoFood pada lokasi yang tersedia.',icon:'fa-solid fa-motorcycle',url:'https://gofood.co.id/'},
+      {name:'GrabFood',note:'Temukan store Tiramisusu melalui GrabFood.',icon:'fa-solid fa-bicycle',url:'https://food.grab.com/id/id/'},
+      {name:'ShopeeFood',note:'Tersedia melalui kanal ShopeeFood.',icon:'fa-solid fa-bag-shopping',url:'https://shopee.co.id/m/shopeefood'}
+    ],
+    currentTitle(){let t=this.tabs.find(x=>x.id===this.activeTab);return t?t.name:'Produk'},
+    currentDescription(){
+      return {
+        produk:'Jelajahi produk yang disebutkan pada menu Tiramisusu Bandung. Harga tidak ditampilkan karena data harga tidak tersedia pada brief.',
+        lokasi:'Pilih store yang ingin dikunjungi dan buka rute melalui Google Maps.',
+        online:'Gunakan kanal pembelian online yang tersedia untuk mencari store dan produk Tiramisusu.',
+        tentang:'Informasi ringkas mengenai Tiramisusu Bandung, produk, kanal, dan identitas toko.'
+      }[this.activeTab];
+    },
+    filteredProducts(){
+      let q=this.search.toLowerCase();
+      return this.products.filter(p=>(this.category==='Semua'||p.category===this.category)&&(!q||[p.name,p.category,p.description,...p.tags].join(' ').toLowerCase().includes(q)));
+    },
+    add(item){
+      let e=this.cart.find(x=>x.id===item.id);
+      if(e)e.qty++; else this.cart.push({...item,qty:1});
+      this.cartOpen=true;
+    },
+    inc(i){this.cart[i].qty++},
+    dec(i){this.cart[i].qty>1?this.cart[i].qty--:this.remove(i)},
+    remove(i){this.cart.splice(i,1)},
+    sendWA(){
+      if(!this.cart.length){alert('Pilih produk terlebih dahulu.');return}
+      let msg='Halo Tiramisusu Bandung, saya ingin menanyakan ketersediaan produk:%0A%0A';
+      this.cart.forEach((x,i)=>msg+=`${i+1}. ${x.name} (${x.qty}x)%0A`);
+      msg+='%0AMohon info harga dan ketersediaannya. Terima kasih.';
+      window.open('https://wa.me/6281120079004?text='+msg,'_blank');
+    }
+  }
+}
+</script>
+</body>
+</html>
